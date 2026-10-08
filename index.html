@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebraic Expressions Master - Form 1 Math</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .font-fredoka {
+            font-family: 'Fredoka', sans-serif;
+        }
+        .btn-bounce {
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+        .token-btn {
+            box-shadow: 0 3px 0 rgba(0,0,0,0.12);
+            transition: all 0.12s ease;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .token-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 0 rgba(0,0,0,0.12);
+        }
+        .token-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.12);
+        }
+        .pill-token {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            animation: popIn 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between selection:bg-purple-200">
+
+    <header class="w-full bg-white/90 border-b-4 border-indigo-200 sticky top-0 z-30 shadow-sm backdrop-blur">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-md transform -rotate-3">
+                    <i class="fa-solid fa-square-root-variable"></i>
+                </div>
+                <div>
+                    <h1 class="font-fredoka text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                        Algebraic Expressions Master
+                    </h1>
+                    <p class="text-xs text-slate-500 hidden sm:block">Interactive Block Expression Builder • Form 1 Math</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 sm:gap-5">
+                <div class="flex items-center gap-2 bg-amber-50 border-2 border-amber-200 px-3 py-1.5 rounded-xl text-amber-700 font-bold text-sm sm:text-base shadow-sm">
+                    <i class="fa-regular fa-clock text-amber-500 animate-pulse"></i>
+                    <span id="game-timer" class="font-mono">00:00</span>
+                </div>
+
+                <div class="flex items-center gap-2 bg-indigo-50 border-2 border-indigo-200 px-3 py-1.5 rounded-xl text-indigo-700 font-bold text-sm sm:text-base shadow-sm">
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <span id="game-score">0</span> pts
+                </div>
+
+                <button id="download-worksheet-btn" onclick="downloadWorksheet()" class="w-10 h-10 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200 transition" title="Download Printable Offline Worksheet">
+                    <i class="fa-solid fa-file-arrow-down"></i>
+                </button>
+
+                <button id="sound-toggle-btn" onclick="toggleSound()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center border border-slate-300 transition" title="Toggle Sound">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto w-full px-4 py-4 flex-grow flex flex-col justify-center">
+
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="space-y-4">
+
+            <!-- Progress Card -->
+            <div class="glass-panel p-3.5 rounded-2xl border-2 border-slate-200 shadow-sm space-y-1.5">
+                <div class="flex justify-between items-center font-bold text-sm text-slate-600">
+                    <span class="flex items-center gap-2">
+                        <span id="question-badge" class="bg-indigo-600 text-white px-2.5 py-0.5 rounded-lg text-xs font-semibold">Q 1 / 50</span>
+                        <span id="difficulty-tag" class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md border border-emerald-300">Basic</span>
+                    </span>
+                    <span class="text-xs text-slate-400" id="progress-percent">2% Completed</span>
+                </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
+                    <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-300 rounded-full" style="width: 2%;"></div>
+                </div>
+            </div>
+
+            <div class="glass-panel border-3 border-indigo-100 rounded-3xl p-5 shadow-lg relative overflow-hidden space-y-4">
+                <div class="space-y-2">
+                    <div class="text-xs font-extrabold tracking-wider uppercase text-indigo-500 flex items-center gap-1.5">
+                        <i class="fa-solid fa-bullseye text-indigo-400"></i> Word Phrase / Problem Statement
+                    </div>
+                    <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800 leading-snug font-fredoka">
+                        x plus 9
+                    </h2>
+                </div>
+
+                <!-- Interactive Block Pills Display Box -->
+                <div class="pt-3 border-t-2 border-dashed border-slate-200 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Your Built Expression (Click any block pill to remove it):
+                        </label>
+                        <span class="text-[11px] text-slate-400 font-medium">
+                            <i class="fa-solid fa-hand-pointer text-indigo-400"></i> Click blocks below to build
+                        </span>
+                    </div>
+
+                    <!-- Block Container Box -->
+                    <div id="pills-display-box" class="min-h-[64px] w-full p-3 bg-slate-50 border-2 border-indigo-200 rounded-2xl flex flex-wrap items-center gap-2 shadow-inner transition-all">
+                        <span id="pills-placeholder" class="text-slate-400 italic text-sm select-none">
+                            Click buttons below to add block pills...
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3 pt-1">
+                        <div class="text-xs text-slate-500 font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-lock-keyhole text-amber-500"></i> Strict Progression: Solve to advance!
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button onclick="backspacePill()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold rounded-xl text-xs transition flex items-center gap-1">
+                                <i class="fa-solid fa-delete-left"></i> ⌫ Backspace
+                            </button>
+                            <button onclick="clearAllPills()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-700 font-bold rounded-xl text-xs transition flex items-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i> Clear All
+                            </button>
+                            <button id="submit-btn" onclick="submitAnswer()" class="btn-bounce px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-fredoka font-bold text-sm sm:text-base rounded-xl shadow-md shadow-emerald-500/20 flex items-center gap-2">
+                                <span>Submit</span>
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Banner Box -->
+                <div id="feedback-box" class="hidden p-3.5 rounded-xl text-sm font-bold flex items-center justify-between animate-fade-in">
+                    <div class="flex items-center gap-3">
+                        <span id="feedback-icon" class="text-xl"></span>
+                        <span id="feedback-message"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 sm:p-5 rounded-3xl border-2 border-slate-200 shadow-md space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <h3 class="font-fredoka font-bold text-slate-800 text-base sm:text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-keyboard text-indigo-500"></i> Categorized Symbol Palette (All-In-One Page)
+                    </h3>
+                    <span class="text-xs text-slate-400 font-medium">Click buttons to insert into display box above</span>
+                </div>
+
+                <!-- 1. Variables Grid -->
+                <div class="space-y-1.5">
+                    <span class="text-xs font-extrabold text-teal-700 uppercase tracking-wider block flex items-center gap-1">
+                        <i class="fa-solid fa-font text-teal-500"></i> Variables:
+                    </span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <script>
+                            const varsList = ['a','b','c','d','g','h','k','L','m','n','p','q','r','s','t','u','v','w','x','y','z','V'];
+                            varsList.forEach(v => {
+                                document.write(`<button onclick="addToken('${v}', 'variable')" class="token-btn px-3 py-1.5 bg-teal-50 hover:bg-teal-100 border border-teal-300 text-teal-900 font-bold rounded-xl text-base font-mono min-w-[38px]">${v}</button>`);
+                            });
+                        </script>
+                    </div>
+                </div>
+
+                <!-- 2. Numbers Grid -->
+                <div class="space-y-1.5">
+                    <span class="text-xs font-extrabold text-indigo-700 uppercase tracking-wider block flex items-center gap-1">
+                        <i class="fa-solid fa-hashtag text-indigo-500"></i> Numbers & Coefficients:
+                    </span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <script>
+                            const numsList = ['0','1','2','3','4','5','6','7','8','9','10','12','15','24','50','100','200','1000'];
+                            numsList.forEach(n => {
+                                document.write(`<button onclick="addToken('${n}', 'number')" class="token-btn px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-900 font-bold rounded-xl text-base font-mono min-w-[38px]">${n}</button>`);
+                            });
+                        </script>
+                    </div>
+                </div>
+
+                <!-- 3. Operators & Exponents Row -->
+                <div class="space-y-1.5">
+                    <span class="text-xs font-extrabold text-pink-700 uppercase tracking-wider block flex items-center gap-1">
+                        <i class="fa-solid fa-calculator text-pink-500"></i> Operators & Powers:
+                    </span>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="addToken('+', 'operator')" class="token-btn px-4 py-1.5 bg-pink-100 hover:bg-pink-200 border border-pink-300 text-pink-800 font-bold rounded-xl text-base font-mono">+</button>
+                        <button onclick="addToken('-', 'operator')" class="token-btn px-4 py-1.5 bg-pink-100 hover:bg-pink-200 border border-pink-300 text-pink-800 font-bold rounded-xl text-base font-mono">-</button>
+                        <button onclick="addToken('×', 'operator')" class="token-btn px-4 py-1.5 bg-pink-100 hover:bg-pink-200 border border-pink-300 text-pink-800 font-bold rounded-xl text-base font-mono">×</button>
+                        <button onclick="addToken('÷', 'operator')" class="token-btn px-4 py-1.5 bg-pink-100 hover:bg-pink-200 border border-pink-300 text-pink-800 font-bold rounded-xl text-base font-mono">÷</button>
+                        <button onclick="addToken('^2', 'exponent')" class="token-btn px-3.5 py-1.5 bg-purple-100 hover:bg-purple-200 border border-purple-300 text-purple-800 font-bold rounded-xl text-sm font-mono">x² (Square)</button>
+                        <button onclick="addToken('^3', 'exponent')" class="token-btn px-3.5 py-1.5 bg-purple-100 hover:bg-purple-200 border border-purple-300 text-purple-800 font-bold rounded-xl text-sm font-mono">x³ (Cube)</button>
+                        <button onclick="addToken('^', 'exponent')" class="token-btn px-3.5 py-1.5 bg-purple-100 hover:bg-purple-200 border border-purple-300 text-purple-800 font-bold rounded-xl text-sm font-mono">^ (Exponent)</button>
+                    </div>
+                </div>
+
+                <!-- 4. Brackets & Action Controls -->
+                <div class="space-y-1.5">
+                    <span class="text-xs font-extrabold text-amber-700 uppercase tracking-wider block flex items-center gap-1">
+                        <i class="fa-solid fa-sliders text-amber-500"></i> Brackets & Controls:
+                    </span>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="addToken('(', 'bracket')" class="token-btn px-4 py-1.5 bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 font-bold rounded-xl text-base font-mono">(</button>
+                        <button onclick="addToken(')', 'bracket')" class="token-btn px-4 py-1.5 bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 font-bold rounded-xl text-base font-mono">)</button>
+                        <button onclick="addToken(' ', 'control')" class="token-btn px-4 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-bold rounded-xl text-xs uppercase">Space</button>
+                        <button onclick="backspacePill()" class="token-btn px-4 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold rounded-xl text-xs"><i class="fa-solid fa-delete-left mr-1"></i> Backspace (⌫)</button>
+                        <button onclick="clearAllPills()" class="token-btn px-4 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-800 font-bold rounded-xl text-xs"><i class="fa-solid fa-trash-can mr-1"></i> Clear All</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="glass-panel p-4 rounded-3xl border-2 border-indigo-100 shadow-md space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-fredoka font-bold text-slate-700 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb text-amber-400"></i> Progressive 3-Tier Hints
+                    </h3>
+                    <span class="text-xs text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 font-bold">
+                        -2 pts per unlocked tier
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <!-- Hint Tier 1 -->
+                    <div id="hint-card-1" class="border-2 border-slate-200 rounded-2xl p-3 bg-slate-50 flex flex-col justify-between transition-all">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-xs text-indigo-600 flex items-center gap-1">
+                                    💡 Tier 1: Keywords
+                                </span>
+                                <span id="hint-badge-1" class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-semibold">Locked</span>
+                            </div>
+                            <p id="hint-content-1" class="text-xs text-slate-600 italic hidden">
+                                <!-- Dynamic Content -->
+                            </p>
+                        </div>
+                        <button id="unlock-hint-1" onclick="unlockHintTier(1)" class="mt-3 w-full py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold btn-bounce transition">
+                            Unlock Hint (-2 pts)
+                        </button>
+                    </div>
+
+                    <!-- Hint Tier 2 -->
+                    <div id="hint-card-2" class="border-2 border-slate-200 rounded-2xl p-3 bg-slate-50 flex flex-col justify-between opacity-60 transition-all">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-xs text-purple-600 flex items-center gap-1">
+                                    🧩 Tier 2: Structure
+                                </span>
+                                <span id="hint-badge-2" class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-semibold">Locked</span>
+                            </div>
+                            <p id="hint-content-2" class="text-xs text-slate-600 italic hidden font-mono bg-purple-50 p-2 rounded border border-purple-200">
+                                <!-- Dynamic Content -->
+                            </p>
+                        </div>
+                        <button id="unlock-hint-2" onclick="unlockHintTier(2)" disabled class="mt-3 w-full py-1.5 bg-slate-300 text-slate-500 cursor-not-allowed rounded-xl text-xs font-bold transition">
+                            Unlock Tier 1 First
+                        </button>
+                    </div>
+
+                    <!-- Hint Tier 3 -->
+                    <div id="hint-card-3" class="border-2 border-slate-200 rounded-2xl p-3 bg-slate-50 flex flex-col justify-between opacity-60 transition-all">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-xs text-pink-600 flex items-center gap-1">
+                                    🔑 Tier 3: Block Guide
+                                </span>
+                                <span id="hint-badge-3" class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-semibold">Locked</span>
+                            </div>
+                            <div id="hint-content-3" class="text-xs text-slate-600 italic hidden flex flex-wrap gap-1 pt-1">
+                                <!-- Dynamic Content -->
+                            </div>
+                        </div>
+                        <button id="unlock-hint-3" onclick="unlockHintTier(3)" disabled class="mt-3 w-full py-1.5 bg-slate-300 text-slate-500 cursor-not-allowed rounded-xl text-xs font-bold transition">
+                            Unlock Tier 2 First
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="summary-screen" class="hidden space-y-6 my-auto animate-fade-in">
+            <div class="glass-panel border-4 border-amber-300 rounded-3xl p-6 sm:p-10 shadow-2xl text-center space-y-6 relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-b from-amber-50/50 via-purple-50/30 to-pink-50/50 -z-10"></div>
+
+                <div class="inline-block bg-amber-100 border-2 border-amber-300 px-4 py-1.5 rounded-full text-amber-800 font-bold text-xs uppercase tracking-wider">
+                    🎉 Quest Completed!
+                </div>
+
+                <h2 class="text-3xl sm:text-5xl font-extrabold font-fredoka bg-gradient-to-r from-amber-500 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                    Congratulations!
+                </h2>
+                <p class="text-slate-600 max-w-md mx-auto text-sm sm:text-base">
+                    You have completed all 50 Form 1 Algebraic Expression translation questions!
+                </p>
+
+                <!-- Metrics Dashboard -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                    <div class="bg-white p-4 rounded-2xl border-2 border-indigo-100 shadow-sm">
+                        <div class="text-xs text-slate-400 font-bold uppercase">Final Score</div>
+                        <div id="final-score-val" class="text-3xl sm:text-4xl font-extrabold font-fredoka text-indigo-600 mt-1">0</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">Points Earned</div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 shadow-sm">
+                        <div class="text-xs text-slate-400 font-bold uppercase">Time Taken</div>
+                        <div id="final-time-val" class="text-3xl sm:text-4xl font-extrabold font-fredoka text-purple-600 mt-1 font-mono">00:00</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">Total Duration</div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border-2 border-emerald-100 shadow-sm">
+                        <div class="text-xs text-slate-400 font-bold uppercase">Accuracy Rate</div>
+                        <div id="final-accuracy-val" class="text-3xl sm:text-4xl font-extrabold font-fredoka text-emerald-600 mt-1">100%</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">First-Try Correct</div>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex flex-wrap justify-center gap-3">
+                    <button onclick="restartQuest()" class="btn-bounce px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-fredoka font-bold text-lg rounded-2xl shadow-xl shadow-indigo-500/25 inline-flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Play Quest Again</span>
+                    </button>
+                    <button onclick="downloadReport()" class="btn-bounce px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-fredoka font-bold text-lg rounded-2xl shadow-xl shadow-emerald-500/25 inline-flex items-center gap-2">
+                        <i class="fa-solid fa-file-lines"></i>
+                        <span>Download Performance Report</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review Card List -->
+            <div class="glass-panel border-2 border-slate-200 rounded-3xl p-6 shadow-md space-y-4">
+                <h3 class="font-fredoka font-bold text-slate-800 text-xl flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-check text-indigo-500"></i> Question Performance Review
+                    </span>
+                    <span id="wrong-count-badge" class="text-xs bg-rose-100 text-rose-700 font-bold px-3 py-1 rounded-full border border-rose-200">
+                        0 Questions to Review
+                    </span>
+                </h3>
+
+                <div id="review-list-container" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    <!-- Dynamic Items -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="py-3 text-center text-xs text-slate-400 font-semibold">
+        Form 1 Mathematics • Interactive Algebraic Translation Tool
+    </footer>
+
+    <script>
+        const questionsData = [
+            { id: 1, phrase: "x plus 9", validAnswers: ["x+9", "9+x"], hint1: "Keyword 'plus' indicates addition (+).", hint2: "[var] + [num]", hint3: ["x", "+", "9"], explanation: "Combine x and 9 with the addition operator (+)." },
+            { id: 2, phrase: "Add k to 12", validAnswers: ["12+k", "k+12"], hint1: "'Add ... to ...' means adding the terms together (+).", hint2: "[num] + [var]", hint3: ["12", "+", "k"], explanation: "Add k to 12 is written as 12 + k." },
+            { id: 3, phrase: "The sum of u and v", validAnswers: ["u+v", "v+u"], hint1: "'Sum' is the result of addition (+).", hint2: "[var1] + [var2]", hint3: ["u", "+", "v"], explanation: "The sum of u and v is u + v." },
+            { id: 4, phrase: "m minus 8", validAnswers: ["m-8"], hint1: "'minus' indicates subtraction (-). Order matters!", hint2: "[var] - [num]", hint3: ["m", "-", "8"], explanation: "Start with m and subtract 8 to get m - 8." },
+            { id: 5, phrase: "Subtract 15 from y", validAnswers: ["y-15"], hint1: "'Subtract A from B' means start with B and take away A (B - A).", hint2: "[var] - [num]", hint3: ["y", "-", "15"], explanation: "15 is subtracted FROM y, so y comes first: y - 15." },
+            { id: 6, phrase: "7a minus 3b", validAnswers: ["7a-3b", "7*a-3*b"], hint1: "'minus' subtracts 3b from 7a.", hint2: "[term1] - [term2]", hint3: ["7a", "-", "3b"], explanation: "Subtract 3b from 7a gives 7a - 3b." },
+            { id: 7, phrase: "Multiply r by s", validAnswers: ["rs", "sr", "r*s", "s*r", "r×s"], hint1: "'Multiply' means multiplication. In algebra, r × s is written as rs.", hint2: "[var1][var2]", hint3: ["r", "s"], explanation: "Multiplying variables r and s gives rs." },
+            { id: 8, phrase: "8 times w", validAnswers: ["8w", "8*w"], hint1: "'times' indicates multiplication.", hint2: "[num][var]", hint3: ["8", "w"], explanation: "8 times w is written as 8w." },
+            { id: 9, phrase: "The product of 9 and p", validAnswers: ["9p", "9*p"], hint1: "'Product' means the result of multiplication.", hint2: "[num][var]", hint3: ["9", "p"], explanation: "The product of 9 and p is 9p." },
+            { id: 10, phrase: "Divide c by 6", validAnswers: ["c/6", "c÷6"], hint1: "'Divide A by B' means A over B (A / B).", hint2: "[var] / [num]", hint3: ["c", "/", "6"], explanation: "Dividing c by 6 is written as c/6 or c÷6." },
+            { id: 11, phrase: "10m is divided by n", validAnswers: ["10m/n", "10*m/n"], hint1: "Numerator is 10m and denominator is n.", hint2: "[term] / [var]", hint3: ["10m", "/", "n"], explanation: "10m divided by n gives 10m/n." },
+            { id: 12, phrase: "The square of d", validAnswers: ["d^2", "d²"], hint1: "'Square' means raising to power of 2.", hint2: "[var] ^ 2", hint3: ["d", "^2"], explanation: "Square of d is d² or d^2." },
+            { id: 13, phrase: "The cube of t", validAnswers: ["t^3", "t³"], hint1: "'Cube' means raising to power of 3.", hint2: "[var] ^ 3", hint3: ["t", "^3"], explanation: "Cube of t is t³ or t^3." },
+            { id: 14, phrase: "The 5th power of g", validAnswers: ["g^5"], hint1: "'5th power' uses exponent 5.", hint2: "[var] ^ 5", hint3: ["g", "^", "5"], explanation: "g to 5th power is g^5." },
+            { id: 15, phrase: "6 to the power x", validAnswers: ["6^x"], hint1: "Base is 6 and exponent is x.", hint2: "6 ^ [var]", hint3: ["6", "^", "x"], explanation: "6 raised to exponent x is 6^x." },
+            { id: 16, phrase: "Add 5 to the product of 3 and x", validAnswers: ["3x+5", "5+3x", "3*x+5"], hint1: "Product of 3 and x is 3x. Then add 5.", hint2: "[term] + [num]", hint3: ["3x", "+", "5"], explanation: "3 times x is 3x. Adding 5 gives 3x + 5." },
+            { id: 17, phrase: "Multiply a by b and then add 10 to the result", validAnswers: ["ab+10", "10+ab", "a*b+10"], hint1: "Product of a and b is ab. Add 10.", hint2: "[var1][var2] + [num]", hint3: ["ab", "+", "10"], explanation: "Multiply a by b to get ab, then add 10: ab + 10." },
+            { id: 18, phrase: "Subtract 7 from 4 times p", validAnswers: ["4p-7", "4*p-7"], hint1: "4 times p is 4p. Subtract 7 FROM 4p.", hint2: "[term] - [num]", hint3: ["4p", "-", "7"], explanation: "4 times p is 4p. Subtracting 7 yields 4p - 7." },
+            { id: 19, phrase: "2 times y minus 5z", validAnswers: ["2y-5z", "2*y-5*z"], hint1: "'2 times y' is 2y. 'minus 5z' is - 5z.", hint2: "[term1] - [term2]", hint3: ["2y", "-", "5z"], explanation: "Combine 2y minus 5z to get 2y - 5z." },
+            { id: 20, phrase: "Divide m by 4 and then add n to the result", validAnswers: ["m/4+n", "n+m/4"], hint1: "Divide m by 4 gives m/4. Then add n.", hint2: "([var1] / [num]) + [var2]", hint3: ["m", "/", "4", "+", "n"], explanation: "m divided by 4 is m/4. Add n gives m/4 + n." },
+            { id: 21, phrase: "Divide p by 2 and then subtract the result from q", validAnswers: ["q-p/2", "q-(p/2)"], hint1: "Subtracting result FROM q means q comes first!", hint2: "q - ([var] / 2)", hint3: ["q", "-", "p", "/", "2"], explanation: "p divided by 2 is p/2. Subtract from q gives q - p/2." },
+            { id: 22, phrase: "Multiply the square of x by y", validAnswers: ["x^2y", "yx^2", "x²y", "x^2*y"], hint1: "Square of x is x^2. Multiply by y.", hint2: "[var1]^2 [var2]", hint3: ["x^2", "y"], explanation: "Square of x is x^2. Multiplied by y gives x^2 y." },
+            { id: 23, phrase: "Multiply a by the cube of b", validAnswers: ["ab^3", "b^3a", "ab³", "a*b^3"], hint1: "Cube of b is b^3. Multiply by a.", hint2: "[var1][var2]^3", hint3: ["a", "b^3"], explanation: "Cube of b is b^3. Multiplying a by b^3 yields ab^3." },
+            { id: 24, phrase: "Add 2 to the product of 4 and x", validAnswers: ["4x+2", "2+4x", "4*x+2"], hint1: "Product of 4 and x is 4x. Add 2.", hint2: "[term] + 2", hint3: ["4x", "+", "2"], explanation: "4 times x is 4x. Adding 2 gives 4x + 2." },
+            { id: 25, phrase: "Divide z by 3 and then subtract the result from y", validAnswers: ["y-z/3", "y-(z/3)"], hint1: "z divided by 3 is z/3. Subtract from y.", hint2: "y - ([var] / 3)", hint3: ["y", "-", "z", "/", "3"], explanation: "z divided by 3 is z/3. Subtracting from y gives y - z/3." },
+            { id: 26, phrase: "Multiply c by 3 and then add 8", validAnswers: ["3c+8", "8+3c", "3*c+8"], hint1: "Multiply c by 3 is 3c. Add 8.", hint2: "[term] + 8", hint3: ["3c", "+", "8"], explanation: "3 times c is 3c. Add 8 yields 3c + 8." },
+            { id: 27, phrase: "Subtract 9 from 2 times m", validAnswers: ["2m-9", "2*m-9"], hint1: "2 times m is 2m. Subtract 9.", hint2: "[term] - 9", hint3: ["2m", "-", "9"], explanation: "2 times m is 2m. Subtract 9 gives 2m - 9." },
+            { id: 28, phrase: "Divide 12 by x and add y", validAnswers: ["12/x+y", "y+12/x"], hint1: "12 divided by x is 12/x. Add y.", hint2: "(12 / [var1]) + [var2]", hint3: ["12", "/", "x", "+", "y"], explanation: "12 divided by x is 12/x. Add y yields 12/x + y." },
+            { id: 29, phrase: "Add p to the product of 5 and q", validAnswers: ["5q+p", "p+5q", "5*q+p"], hint1: "Product of 5 and q is 5q. Add p.", hint2: "[term] + p", hint3: ["5q", "+", "p"], explanation: "Product of 5 and q is 5q. Adding p gives 5q + p." },
+            { id: 30, phrase: "Multiply the cube of y by z", validAnswers: ["y^3z", "zy^3", "y³z", "y^3*z"], hint1: "Cube of y is y^3. Multiply by z.", hint2: "y^3 [var]", hint3: ["y^3", "z"], explanation: "Cube of y is y^3. Multiplied by z gives y^3 z." },
+            { id: 31, phrase: "Multiply the sum of a and b by 6", validAnswers: ["6(a+b)", "6*(a+b)", "(a+b)*6", "(a+b)6"], hint1: "Sum of a and b is (a + b). Multiply whole sum by 6.", hint2: "6 ( [a] + [b] )", hint3: ["6", "(", "a", "+", "b", ")"], explanation: "Use brackets for sum: 6(a + b)." },
+            { id: 32, phrase: "Add 9 to y and then multiply the sum by 3", validAnswers: ["3(y+9)", "3(9+y)", "(y+9)*3", "3*(y+9)"], hint1: "First add 9 to y to get (y + 9). Multiply sum by 3.", hint2: "3 ( [y] + 9 )", hint3: ["3", "(", "y", "+", "9", ")"], explanation: "Sum is (y + 9). Multiplied by 3 gives 3(y + 9)." },
+            { id: 33, phrase: "Subtract 4 from x and then divide the difference by y", validAnswers: ["(x-4)/y", "(x-4)÷y"], hint1: "Difference is (x - 4). Divide whole numerator by y.", hint2: "( [x] - 4 ) / [y]", hint3: ["(", "x", "-", "4", ")", "/", "y"], explanation: "Difference is x - 4. Divide by y gives (x - 4)/y." },
+            { id: 34, phrase: "Divide the sum of m and n by 8", validAnswers: ["(m+n)/8", "(n+m)/8", "(m+n)÷8"], hint1: "Sum of m and n is (m + n). Divide entire sum by 8.", hint2: "( [m] + [n] ) / 8", hint3: ["(", "m", "+", "n", ")", "/", "8"], explanation: "Sum is (m + n). Divided by 8 yields (m + n)/8." },
+            { id: 35, phrase: "Subtract k from 12 and then multiply the result by 5", validAnswers: ["5(12-k)", "(12-k)*5", "5*(12-k)"], hint1: "Subtracting k from 12 gives (12 - k). Multiply by 5.", hint2: "5 ( 12 - [k] )", hint3: ["5", "(", "12", "-", "k", ")"], explanation: "Result is (12 - k). Multiplied by 5 gives 5(12 - k)." },
+            { id: 36, phrase: "Subtract q from the square of p and then divide the difference by 3", validAnswers: ["(p^2-q)/3", "(p²-q)/3"], hint1: "Square of p is p^2. Difference is (p^2 - q). Divide by 3.", hint2: "( p^2 - [q] ) / 3", hint3: ["(", "p^2", "-", "q", ")", "/", "3"], explanation: "Difference is p^2 - q. Divided by 3 gives (p^2 - q)/3." },
+            { id: 37, phrase: "Multiply the sum of x and 1 by 7 and subtract the result from y", validAnswers: ["y-7(x+1)", "y-7*(x+1)"], hint1: "7 times sum (x + 1) is 7(x + 1). Subtract from y.", hint2: "y - 7 ( x + 1 )", hint3: ["y", "-", "7", "(", "x", "+", "1", ")"], explanation: "Subtract 7(x + 1) from y gives y - 7(x + 1)." },
+            { id: 38, phrase: "Add 4 to m and divide the result by the cube of n", validAnswers: ["(m+4)/n^3", "(4+m)/n^3", "(m+4)/n³"], hint1: "Adding 4 to m is (m + 4). Cube of n is n^3.", hint2: "( m + 4 ) / n^3", hint3: ["(", "m", "+", "4", ")", "/", "n^3"], explanation: "Result (m + 4) divided by n^3 gives (m + 4)/n^3." },
+            { id: 39, phrase: "Subtract 6 from p and then divide the difference by q", validAnswers: ["(p-6)/q", "(p-6)÷q"], hint1: "Difference is (p - 6). Divide by q.", hint2: "( p - 6 ) / q", hint3: ["(", "p", "-", "6", ")", "/", "q"], explanation: "Difference (p - 6) divided by q gives (p - 6)/q." },
+            { id: 40, phrase: "Subtract d from the cube of c and then divide the difference by 8", validAnswers: ["(c^3-d)/8", "(c³-d)/8"], hint1: "Cube of c is c^3. Difference is (c^3 - d). Divide by 8.", hint2: "( c^3 - d ) / 8", hint3: ["(", "c^3", "-", "d", ")", "/", "8"], explanation: "Difference (c^3 - d) divided by 8 gives (c^3 - d)/8." },
+            { id: 41, phrase: "Sarah has n cookies originally and bakes 12 more. How many cookies does she have now?", validAnswers: ["n+12", "12+n"], hint1: "'bakes 12 more' means adding 12 to initial n.", hint2: "n + 12", hint3: ["n", "+", "12"], explanation: "Initial cookies n plus 12 gives n + 12." },
+            { id: 42, phrase: "A ribbon is L cm long. If 8 cm is cut off, what is the remaining length?", validAnswers: ["L-8", "l-8"], hint1: "'cut off' means taking away or subtracting 8 from L.", hint2: "L - 8", hint3: ["L", "-", "8"], explanation: "Remaining length is L - 8 cm." },
+            { id: 43, phrase: "A box of chocolates is shared equally among k children. If the box has 24 chocolates, how many does each child get?", validAnswers: ["24/k", "24÷k"], hint1: "'shared equally' indicates division. Total items over number of children.", hint2: "24 / k", hint3: ["24", "/", "k"], explanation: "24 chocolates divided among k children gives 24/k." },
+            { id: 44, phrase: "The price of a pen is $p. What is the total cost of 6 pens?", validAnswers: ["6p", "6*p"], hint1: "Multiply unit price p by total count 6.", hint2: "6p", hint3: ["6", "p"], explanation: "6 pens at $p each costs 6p." },
+            { id: 45, phrase: "Kevin has $100. He buys x books at $15 each. How much money does he have left?", validAnswers: ["100-15x", "100-15*x"], hint1: "Cost of x books is 15x. Remaining money = Total 100 - Cost.", hint2: "100 - 15x", hint3: ["100", "-", "15x"], explanation: "Cost of books is 15x. Money left is 100 - 15x." },
+            { id: 46, phrase: "A water bottle contains V mL of juice. After filling 4 cups of y mL each, how much juice is left in the bottle?", validAnswers: ["V-4y", "v-4y", "V-4*y"], hint1: "Juice in 4 cups is 4y. Juice left = V - 4y.", hint2: "V - 4y", hint3: ["V", "-", "4y"], explanation: "4 cups of y mL is 4y mL. Juice left is V - 4y." },
+            { id: 47, phrase: "A bus has p passengers. At the next stop, 5 passengers get off and q passengers get on. How many passengers are on the bus now?", validAnswers: ["p-5+q", "p+q-5"], hint1: "Start with p, subtract 5 who got off, add q who got on.", hint2: "p - 5 + q", hint3: ["p", "-", "5", "+", "q"], explanation: "Passengers now = p - 5 + q." },
+            { id: 48, phrase: "A painter earns $h per hour. How much does he earn if he works for t hours and receives a bonus of $50?", validAnswers: ["ht+50", "th+50", "50+ht", "h*t+50"], hint1: "Pay for t hours is h × t = ht. Add $50 bonus.", hint2: "ht + 50", hint3: ["ht", "+", "50"], explanation: "Total pay is ht + 50." },
+            { id: 49, phrase: "Peter has 5 tokens originally. His mother gives him m more tokens. He uses all his tokens to play a game 4 times. How many tokens are needed per game?", validAnswers: ["(5+m)/4", "(m+5)/4", "(5+m)÷4"], hint1: "Total tokens = (5 + m). Divide total by 4 games.", hint2: "( 5 + m ) / 4", hint3: ["(", "5", "+", "m", ")", "/", "4"], explanation: "Tokens per game is (5 + m)/4." },
+            { id: 50, phrase: "Winnie pays $1000 for 5 skirts at $p each and a pair of trousers at $200. How much change does she receive?", validAnswers: ["1000-(5p+200)", "1000-5p-200", "800-5p", "1000-(5*p+200)"], hint1: "Total cost = 5 skirts (5p) + trousers (200). Change = 1000 - Total cost.", hint2: "1000 - ( 5p + 200 )", hint3: ["1000", "-", "(", "5p", "+", "200", ")"], explanation: "Cost of skirts is 5p. Total spending is (5p + 200). Change is 1000 - (5p + 200)." }
+        ];
+
+        let currentIndex = 0;
+        let score = 0;
+        let timerSeconds = 0;
+        let timerInterval = null;
+        let builtPills = [];
+        let audioEnabled = true;
+        let questionAttempts = [];
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new AudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1);
+                    osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(150, now + 0.25);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(420, now);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'remove') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.08);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'hint') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(500, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            audioEnabled = !audioEnabled;
+            const icon = document.getElementById('sound-icon');
+            icon.className = audioEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark text-slate-400';
+        }
+
+        function startTimer() {
+            timerSeconds = 0;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+                const secs = (timerSeconds % 60).toString().padStart(2, '0');
+                document.getElementById('game-timer').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        window.onload = function() {
+            initGame();
+        };
+
+        function initGame() {
+            currentIndex = 0;
+            score = 0;
+            questionAttempts = Array.from({ length: 50 }, () => ({
+                attemptsCount: 0,
+                hintsUnlocked: [false, false, false],
+                wrongSubmissions: [],
+                isFirstTryCorrect: false
+            }));
+
+            updateScoreUI();
+            startTimer();
+            loadQuestion(currentIndex);
+
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('summary-screen').classList.add('hidden');
+        }
+
+        function loadQuestion(index) {
+            const q = questionsData[index];
+
+            document.getElementById('question-badge').innerText = `Q ${index + 1} / 50`;
+            const percent = Math.round(((index + 1) / 50) * 100);
+            document.getElementById('progress-percent').innerText = `${percent}% Completed`;
+            document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+
+            const diffTag = document.getElementById('difficulty-tag');
+            if (index < 15) {
+                diffTag.innerText = "Basic Operational";
+                diffTag.className = "text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md border border-emerald-300 font-semibold";
+            } else if (index < 35) {
+                diffTag.innerText = "Multi-step Algebraic";
+                diffTag.className = "text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md border border-amber-300 font-semibold";
+            } else {
+                diffTag.innerText = "Word Problem Context";
+                diffTag.className = "text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md border border-purple-300 font-semibold";
+            }
+
+            document.getElementById('question-text').innerText = q.phrase;
+
+            clearAllPills();
+            hideFeedback();
+            resetHintCards(q);
+        }
+
+        function resetHintCards(q) {
+            // Tier 1
+            document.getElementById('hint-card-1').classList.remove('opacity-60');
+            document.getElementById('hint-content-1').classList.add('hidden');
+            document.getElementById('hint-content-1').innerText = q.hint1;
+            document.getElementById('hint-badge-1').innerText = "Locked";
+            document.getElementById('hint-badge-1').className = "text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-semibold";
+            const btn1 = document.getElementById('unlock-hint-1');
+            btn1.disabled = false;
+            btn1.innerText = "Unlock Hint (-2 pts)";
+            btn1.className = "mt-3 w-full py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold btn-bounce transition";
+
+            // Tier 2
+            document.getElementById('hint-card-2').classList.add('opacity-60');
+            document.getElementById('hint-content-2').classList.add('hidden');
+            document.getElementById('hint-content-2').innerText = q.hint2;
+            document.getElementById('hint-badge-2').innerText = "Locked";
+            document.getElementById('hint-badge-2').className = "text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-semibold";
+            const btn2 = document.getElementById('unlock-hint-2');
+            btn2.disabled = true;
+            btn2.innerText = "Unlock Tier 1 First";
+            btn2.className = "mt-3 w-full py-1.5 bg-slate-300 text-slate-500 cursor-not-allowed rounded-xl text-xs font-bold transition";
+
+            // Tier 3
+            document.getElementById('hint-card-3').classList.add('opacity-60');
+            const h3Content = document.getElementById('hint-content-3');
+            h3Content.classList.add('hidden');
+            h3Content.innerHTML = '';
+            q.hint3.forEach(b => {
+                const badge = document.createElement('span');
+                badge.className = 'px-2 py-0.5 bg-pink-100 text-pink-800 font-mono font-bold border border-pink-300 rounded';
+                badge.innerText = b;
+                h3Content.appendChild(badge);
+            });
+            document.getElementById('hint-badge-3').innerText = "Locked";
+            document.getElementById('hint-badge-3').className = "text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-semibold";
+            const btn3 = document.getElementById('unlock-hint-3');
+            btn3.disabled = true;
+            btn3.innerText = "Unlock Tier 2 First";
+            btn3.className = "mt-3 w-full py-1.5 bg-slate-300 text-slate-500 cursor-not-allowed rounded-xl text-xs font-bold transition";
+        }
+
+        function unlockHintTier(tier) {
+            playSound('hint');
+            score -= 2;
+            updateScoreUI();
+
+            questionAttempts[currentIndex].hintsUnlocked[tier - 1] = true;
+
+            if (tier === 1) {
+                document.getElementById('hint-content-1').classList.remove('hidden');
+                document.getElementById('hint-badge-1').innerText = "Unlocked";
+                document.getElementById('hint-badge-1').className = "text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold border border-emerald-300";
+                const btn1 = document.getElementById('unlock-hint-1');
+                btn1.disabled = true;
+                btn1.innerText = "Unlocked";
+                btn1.className = "mt-3 w-full py-1.5 bg-emerald-500 text-white rounded-xl text-xs font-bold cursor-default opacity-80";
+
+                document.getElementById('hint-card-2').classList.remove('opacity-60');
+                const btn2 = document.getElementById('unlock-hint-2');
+                btn2.disabled = false;
+                btn2.innerText = "Unlock Hint (-2 pts)";
+                btn2.className = "mt-3 w-full py-1.5 bg-purple-500 hover:bg-purple-600 text-white rounded-xl text-xs font-bold btn-bounce transition";
+            } else if (tier === 2) {
+                document.getElementById('hint-content-2').classList.remove('hidden');
+                document.getElementById('hint-badge-2').innerText = "Unlocked";
+                document.getElementById('hint-badge-2').className = "text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold border border-emerald-300";
+                const btn2 = document.getElementById('unlock-hint-2');
+                btn2.disabled = true;
+                btn2.innerText = "Unlocked";
+                btn2.className = "mt-3 w-full py-1.5 bg-emerald-500 text-white rounded-xl text-xs font-bold cursor-default opacity-80";
+
+                document.getElementById('hint-card-3').classList.remove('opacity-60');
+                const btn3 = document.getElementById('unlock-hint-3');
+                btn3.disabled = false;
+                btn3.innerText = "Unlock Hint (-2 pts)";
+                btn3.className = "mt-3 w-full py-1.5 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-xs font-bold btn-bounce transition";
+            } else if (tier === 3) {
+                document.getElementById('hint-content-3').classList.remove('hidden');
+                document.getElementById('hint-badge-3').innerText = "Unlocked";
+                document.getElementById('hint-badge-3').className = "text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold border border-emerald-300";
+                const btn3 = document.getElementById('unlock-hint-3');
+                btn3.disabled = true;
+                btn3.innerText = "Unlocked";
+                btn3.className = "mt-3 w-full py-1.5 bg-emerald-500 text-white rounded-xl text-xs font-bold cursor-default opacity-80";
+            }
+        }
+
+        // --- BLOCK PILLS LOGIC ---
+        function addToken(val, category) {
+            playSound('click');
+            builtPills.push({ id: Date.now() + Math.random(), val: val, category: category });
+            renderPills();
+            hideFeedback();
+        }
+
+        function removePill(index) {
+            playSound('remove');
+            builtPills.splice(index, 1);
+            renderPills();
+            hideFeedback();
+        }
+
+        function backspacePill() {
+            if (builtPills.length > 0) {
+                playSound('remove');
+                builtPills.pop();
+                renderPills();
+                hideFeedback();
+            }
+        }
+
+        function clearAllPills() {
+            if (builtPills.length > 0) playSound('remove');
+            builtPills = [];
+            renderPills();
+            hideFeedback();
+        }
+
+        function renderPills() {
+            const container = document.getElementById('pills-display-box');
+            container.innerHTML = '';
+
+            if (builtPills.length === 0) {
+                const placeholder = document.createElement('span');
+                placeholder.id = 'pills-placeholder';
+                placeholder.className = 'text-slate-400 italic text-sm select-none';
+                placeholder.innerText = 'Click buttons below to add block pills...';
+                container.appendChild(placeholder);
+                return;
+            }
+
+            builtPills.forEach((pill, idx) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.onclick = () => removePill(idx);
+                button.className = `pill-token px-3 py-1.5 rounded-xl font-mono font-bold text-sm border shadow-sm transition hover:scale-105 active:scale-95 group flex items-center gap-1.5 ${getPillStyle(pill.category)}`;
+                
+                button.innerHTML = `
+                    <span>${pill.val}</span>
+                    <i class="fa-solid fa-xmark text-[11px] opacity-60 group-hover:opacity-100 group-hover:text-rose-600 transition"></i>
+                `;
+                container.appendChild(button);
+            });
+        }
+
+        function getPillStyle(cat) {
+            switch (cat) {
+                case 'variable': return 'bg-teal-100 hover:bg-teal-200 border-teal-300 text-teal-900';
+                case 'number': return 'bg-indigo-100 hover:bg-indigo-200 border-indigo-300 text-indigo-900';
+                case 'operator': return 'bg-pink-100 hover:bg-pink-200 border-pink-300 text-pink-900';
+                case 'exponent': return 'bg-purple-100 hover:bg-purple-200 border-purple-300 text-purple-900';
+                case 'bracket': return 'bg-amber-100 hover:bg-amber-200 border-amber-300 text-amber-900';
+                default: return 'bg-slate-200 hover:bg-slate-300 border-slate-400 text-slate-800';
+            }
+        }
+
+        function getBuiltExpressionString() {
+            return builtPills.map(p => p.val).join('');
+        }
+
+        function normalizeExpr(str) {
+            if (!str) return "";
+            return str.toString()
+                .replace(/\s+/g, '')
+                .replace(/×/g, '*')
+                .replace(/÷/g, '/')
+                .replace(/²/g, '^2')
+                .replace(/³/g, '^3')
+                .replace(/\$/g, '')
+                .toLowerCase();
+        }
+
+        function submitAnswer() {
+            const rawBuilt = getBuiltExpressionString();
+            const normalizedBuilt = normalizeExpr(rawBuilt);
+
+            if (!rawBuilt || rawBuilt.trim() === '') {
+                showFeedback('wrong', 'Please construct your expression using the block pills first!');
+                return;
+            }
+
+            const currentQ = questionsData[currentIndex];
+            const qAttempt = questionAttempts[currentIndex];
+            qAttempt.attemptsCount++;
+
+            let isCorrect = currentQ.validAnswers.some(ans => normalizeExpr(ans) === normalizedBuilt);
+
+            if (!isCorrect) {
+                const altBuilt = normalizedBuilt.replace(/\*/g, '');
+                isCorrect = currentQ.validAnswers.some(ans => normalizeExpr(ans).replace(/\*/g, '') === altBuilt);
+            }
+
+            if (isCorrect) {
+                playSound('correct');
+                score += 10;
+                updateScoreUI();
+
+                if (qAttempt.attemptsCount === 1) {
+                    qAttempt.isFirstTryCorrect = true;
+                }
+
+                showFeedback('correct', `🎉 Correct! (+10 pts)`);
+                document.getElementById('submit-btn').disabled = true;
+
+                setTimeout(() => {
+                    document.getElementById('submit-btn').disabled = false;
+                    currentIndex++;
+                    if (currentIndex < questionsData.length) {
+                        loadQuestion(currentIndex);
+                    } else {
+                        finishQuest();
+                    }
+                }, 1100);
+
+            } else {
+                playSound('wrong');
+                score -= 5;
+                updateScoreUI();
+
+                qAttempt.wrongSubmissions.push(rawBuilt);
+                showFeedback('wrong', `❌ Incorrect (-5 pts). Adjust your blocks or unlock a hint!`);
+            }
+        }
+
+        function showFeedback(type, message) {
+            const box = document.getElementById('feedback-box');
+            const icon = document.getElementById('feedback-icon');
+            const text = document.getElementById('feedback-message');
+
+            box.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'border-emerald-300', 'bg-rose-100', 'text-rose-800', 'border-rose-300');
+
+            if (type === 'correct') {
+                box.classList.add('bg-emerald-100', 'text-emerald-800', 'border-2', 'border-emerald-300');
+                icon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i>';
+            } else {
+                box.classList.add('bg-rose-100', 'text-rose-800', 'border-2', 'border-rose-300');
+                icon.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600"></i>';
+            }
+
+            text.innerText = message;
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedback-box').classList.add('hidden');
+        }
+
+        function updateScoreUI() {
+            document.getElementById('game-score').innerText = score;
+        }
+
+        function finishQuest() {
+            stopTimer();
+
+            try {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            } catch (e) {}
+
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('summary-screen').classList.remove('hidden');
+
+            document.getElementById('final-score-val').innerText = score;
+            const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const secs = (timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('final-time-val').innerText = `${mins}:${secs}`;
+
+            const firstTryCount = questionAttempts.filter(a => a.isFirstTryCorrect).length;
+            const accRate = Math.round((firstTryCount / 50) * 100);
+            document.getElementById('final-accuracy-val').innerText = `${accRate}%`;
+
+            const reviewContainer = document.getElementById('review-list-container');
+            reviewContainer.innerHTML = '';
+
+            const wrongQuestions = questionAttempts
+                .map((att, idx) => ({ att, q: questionsData[idx] }))
+                .filter(item => item.att.wrongSubmissions.length > 0);
+
+            document.getElementById('wrong-count-badge').innerText = `${wrongQuestions.length} Questions with Mistakes`;
+
+            if (wrongQuestions.length === 0) {
+                reviewContainer.innerHTML = `
+                    <div class="text-center py-8 text-emerald-600 font-bold bg-emerald-50 rounded-2xl border border-emerald-200">
+                        <i class="fa-solid fa-trophy text-3xl mb-2"></i>
+                        <p>Flawless Quest! You solved all 50 questions on your first attempt without any mistakes!</p>
+                    </div>`;
+            } else {
+                wrongQuestions.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm space-y-2';
+
+                    const wrongListHTML = item.att.wrongSubmissions.map(w =>
+                        `<span class="px-2 py-0.5 bg-rose-50 text-rose-700 font-mono text-xs rounded border border-rose-200">${w}</span>`
+                    ).join(' ');
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="font-bold text-slate-800 text-sm">
+                                <span class="text-indigo-600 font-extrabold">Q${item.q.id}:</span> ${item.q.phrase}
+                            </div>
+                            <span class="text-xs bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-md">
+                                ${item.att.wrongSubmissions.length} Incorrect Attempt(s)
+                            </span>
+                        </div>
+
+                        <div class="text-xs space-y-1">
+                            <div>
+                                <span class="font-bold text-slate-500">Your Attempt(s):</span>
+                                <div class="flex flex-wrap gap-1 mt-1">${wrongListHTML}</div>
+                            </div>
+                            <div class="pt-1">
+                                <span class="font-bold text-emerald-600">Correct Expression:</span>
+                                <span class="font-mono font-bold bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200 ml-1">
+                                    ${item.q.validAnswers[0]}
+                                </span>
+                            </div>
+                            <div class="text-slate-600 bg-slate-50 p-2 rounded-xl text-xs mt-2 border border-slate-200">
+                                <span class="font-bold text-indigo-600"><i class="fa-solid fa-chalkboard-user"></i> Explanation:</span> ${item.q.explanation}
+                            </div>
+                        </div>
+                    `;
+                    reviewContainer.appendChild(card);
+                });
+            }
+        }
+
+        function restartQuest() {
+            initGame();
+        }
+
+        function downloadWorksheet() {
+            let content = `<!DOCTYPE html><html><head><title>Form 1 Algebra Worksheet</title>`;
+            content += `<style>body{font-family:sans-serif;padding:30px;line-height:1.6;} h1{color:#312e81;} .q{margin-bottom:15px;padding:10px;border-bottom:1px solid #e2e8f0;} .num{font-weight:bold;color:#4f46e5;}</style></head><body>`;
+            content += `<h1>Form 1 Mathematics - Algebraic Expressions Worksheet</h1>`;
+            content += `<p>Translate each word phrase into an algebraic expression.</p><hr><ol>`;
+            questionsData.forEach(q => {
+                content += `<li class="q"><span class="num">Q${q.id}:</span> ${q.phrase}<br><br><strong>Answer:</strong> ______________________</li>`;
+            });
+            content += `</ol></body></html>`;
+
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Form1_Algebraic_Expressions_Worksheet.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadReport() {
+            const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const secs = (timerSeconds % 60).toString().padStart(2, '0');
+            const firstTryCount = questionAttempts.filter(a => a.isFirstTryCorrect).length;
+            const accRate = Math.round((firstTryCount / 50) * 100);
+
+            let report = `=================================================\n`;
+            report += `  ALGEBRAIC EXPRESSIONS MASTER - PERFORMANCE REPORT\n`;
+            report += `=================================================\n\n`;
+            report += `Final Score   : ${score} pts\n`;
+            report += `Total Time    : ${mins}:${secs}\n`;
+            report += `Accuracy Rate : ${accRate}%\n`;
+            report += `Questions Solved: 50 / 50\n\n`;
+            report += `-------------------------------------------------\n`;
+            report += `QUESTION PERFORMANCE BREAKDOWN:\n`;
+            report += `-------------------------------------------------\n\n`;
+
+            questionsData.forEach((q, idx) => {
+                const att = questionAttempts[idx];
+                report += `Q${q.id}: ${q.phrase}\n`;
+                report += `   - Status: ${att.isFirstTryCorrect ? "Correct on 1st try" : "Required multiple attempts"}\n`;
+                report += `   - Attempts: ${att.attemptsCount}\n`;
+                if (att.wrongSubmissions.length > 0) {
+                    report += `   - Incorrect Entries: ${att.wrongSubmissions.join(', ')}\n`;
+                }
+                report += `   - Correct Answer: ${q.validAnswers[0]}\n\n`;
+            });
+
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Algebra_Quest_Report_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
